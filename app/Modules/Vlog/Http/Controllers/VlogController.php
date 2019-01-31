@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Modules\Vlog\Models\Vlog;
 use App\Http\Controllers\Controller;
 use Damnyan\Cmn\Services\ApiResponse;
+use Illuminate\Support\Facades\Validator;
 
 class VlogController extends Controller
 {
@@ -29,6 +30,24 @@ class VlogController extends Controller
     */
     public function store(Request $request)
     {
+        $payload = $request->only('title', 'body');
+        $rules = [
+            'title'   => 'required',
+            'body' => 'required'
+        ];
+
+        $validator = Validator::make($payload, $rules);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return response()->json(
+                [
+                    "message" => "Unprocessable Entity",
+                    "errors" => $errors
+                ],
+                422
+            );
+        }
+
         $payload = $request->all();
         $vlog = Vlog::create($payload);
         return (new ApiResponse)->resource($vlog);
@@ -55,8 +74,26 @@ class VlogController extends Controller
     *
     * @return \Damnyan\Cmn\Services\ApiResponse
     */
-    public function update(Request $request, $id)
+    public function update(VlogRequest $request, $id)
     {
+        $payload = $request->only('title', 'body');
+        $rules = [
+            'title'   => 'required',
+            'body' => 'required'
+        ];
+
+        $validator = Validator::make($payload, $rules);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            return response()->json(
+                [
+                    "message" => "Unprocessable Entity",
+                    "errors" => $errors
+                ],
+                422
+            );
+        }
+
         $payload = $request->all();
         $vlog = Vlog::findOrFail($id);
         $vlog->update($payload);
